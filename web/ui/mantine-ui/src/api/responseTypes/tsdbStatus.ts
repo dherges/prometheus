@@ -14,6 +14,7 @@ interface HeadStats {
 // Result type for /api/v1/status/tsdb endpoint.
 // See: https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats
 export interface TSDBStatusResult {
+  adminApiEnabled: boolean;
   headStats: HeadStats;
   seriesCountByMetricName: Stats[];
   labelValueCountByLabelName: Stats[];

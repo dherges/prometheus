@@ -25,6 +25,7 @@ export default function TSDBStatusPage() {
   const {
     data: {
       data: {
+        adminApiEnabled,
         headStats,
         labelValueCountByLabelName,
         seriesCountByMetricName,
@@ -251,6 +252,8 @@ export default function TSDBStatusPage() {
             label="Series selector(s)"
             description='PromQL series selectors, one per line. Example: up{job="prometheus"}'
             placeholder={'up{job="prometheus"}'}
+            disabled={!adminApiEnabled}
+            title={!adminApiEnabled ? "Requires --web.enable-admin-api flag" : ""}
             value={matchers}
             onChange={(e) => setMatchers(e.currentTarget.value)}
             autosize
@@ -264,6 +267,8 @@ export default function TSDBStatusPage() {
               description="Optional"
               placeholder="Select start time"
               valueFormat="YYYY-MM-DD HH:mm:ss"
+              disabled={!adminApiEnabled}
+              title={!adminApiEnabled ? "Requires --web.enable-admin-api flag" : ""}
               withSeconds
               value={
                 startTime !== null
@@ -290,6 +295,8 @@ export default function TSDBStatusPage() {
               description="Optional"
               placeholder="Select end time"
               valueFormat="YYYY-MM-DD HH:mm:ss"
+              disabled={!adminApiEnabled}
+              title={!adminApiEnabled ? "Requires --web.enable-admin-api flag" : ""}
               withSeconds
               value={
                 endTime !== null
@@ -319,7 +326,8 @@ export default function TSDBStatusPage() {
               leftSection={<IconTrash size={16} />}
               onClick={handleDelete}
               loading={deleting}
-              disabled={!matchers.trim()}
+              disabled={!matchers.trim() || !adminApiEnabled}
+              title={!adminApiEnabled ? "Requires --web.enable-admin-api flag" : ""}
             >
               Delete series
             </Button>
@@ -362,6 +370,8 @@ export default function TSDBStatusPage() {
               variant="outline"
               onClick={handleCleanTombstones}
               loading={cleaning}
+              disabled={!adminApiEnabled}
+              title={!adminApiEnabled ? "Requires --web.enable-admin-api flag" : ""}
             >
               Clean tombstones
             </Button>
