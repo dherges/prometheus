@@ -1866,6 +1866,7 @@ type HeadStats struct {
 
 // TSDBStatus has information of cardinality statistics from postings.
 type TSDBStatus struct {
+	AdminAPIEnabled             bool       `json:"adminApiEnabled"`
 	HeadStats                   HeadStats  `json:"headStats"`
 	SeriesCountByMetricName     []TSDBStat `json:"seriesCountByMetricName"`
 	LabelValueCountByLabelName  []TSDBStat `json:"labelValueCountByLabelName"`
@@ -1959,6 +1960,7 @@ func (api *API) serveTSDBStatus(r *http.Request) apiFuncResult {
 		}
 	}
 	return apiFuncResult{TSDBStatus{
+		AdminAPIEnabled: api.enableAdmin,
 		HeadStats: HeadStats{
 			NumSeries:     s.NumSeries,
 			ChunkCount:    chunkCount,
