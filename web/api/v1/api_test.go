@@ -4515,18 +4515,26 @@ func TestTSDBStatus(t *testing.T) {
 	tsdbStatusAPI := func(api *API) apiFunc { return api.serveTSDBStatus }
 
 	for i, tc := range []struct {
-		db       *fakeDB
-		endpoint func(api *API) apiFunc
-		method   string
-		values   url.Values
+		db          *fakeDB
+		endpoint    func(api *API) apiFunc
+		method      string
+		values      url.Values
+		enableAdmin bool
 
 		errType errorType
 	}{
 		// Tests for the TSDB Status endpoint.
 		{
-			db:       tsdb,
-			endpoint: tsdbStatusAPI,
-			errType:  errorNone,
+			db:          tsdb,
+			endpoint:    tsdbStatusAPI,
+			enableAdmin: false,
+			errType:     errorNone,
+		},
+		{
+			db:          tsdb,
+			endpoint:    tsdbStatusAPI,
+			enableAdmin: true,
+			errType:     errorNone,
 		},
 		{
 			db:       tsdb,
@@ -4554,12 +4562,18 @@ func TestTSDBStatus(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			api := &API{db: tc.db, gatherer: prometheus.DefaultGatherer}
+			api := &API{db: tc.db, gatherer: prometheus.DefaultGatherer, enableAdmin: tc.enableAdmin}
 			endpoint := tc.endpoint(api)
 			req, err := http.NewRequest(tc.method, fmt.Sprintf("?%s", tc.values.Encode()), http.NoBody)
 			require.NoError(t, err, "Error when creating test request")
 			res := endpoint(req)
 			assertAPIError(t, res.err, tc.errType)
+			if tc.errType == errorNone && res.data != nil {
+				statusData, ok := res.data.(TSDBStatus)
+				if ok {
+					require.Equal(t, tc.enableAdmin, statusData.AdminAPIEnabled, "AdminAPIEnabled flag mismatch in test case %d", i)
+				}
+			}
 		})
 	}
 }
